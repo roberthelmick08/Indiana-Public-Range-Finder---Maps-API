@@ -100,7 +100,7 @@ function initMap() {
       title: 'Jasper-Pulaski FWA',
       location: {
         lat: 41.1394599,
-        lng:-86.91728810000001
+        lng: -86.91728810000001
       },
       address: "5822 N. Fish and Wildlife Lane Medaryville, IN 47957",
       phone: "(219) 843-4841",
@@ -114,7 +114,7 @@ function initMap() {
       title: 'Kingsbury FWA',
       location: {
         lat: 41.5193809,
-        lng:-86.6202429
+        lng: -86.6202429
       },
       address: "5344 S. Hupp Road LaPorte, IN 46350",
       phone: "(219) 393-1128",
@@ -128,7 +128,7 @@ function initMap() {
       title: 'Pigeon River FWA',
       location: {
         lat: 41.682226,
-        lng:-85.26775399999997
+        lng: -85.26775399999997
       },
       address: "8310 E. 300 N. Box 71 Mongo, IN 46771",
       phone: "(260) 367-2164",
@@ -142,7 +142,7 @@ function initMap() {
       title: 'Sugar Ridge FWA',
       location: {
         lat: 38.35413459999999,
-        lng:-87.2324504
+        lng: -87.2324504
       },
       address: "2310 East SR 364  Winslow, IN 47598",
       phone: "(812) 789-2724",
@@ -156,7 +156,7 @@ function initMap() {
       title: 'Tri-County FWA',
       location: {
         lat: 41.3573625,
-        lng:-85.68091849999996
+        lng: -85.68091849999996
       },
       address: "8432 N 850 E, Syracuse, IN 46567, United States",
       phone: "(574) 834-4461",
@@ -170,7 +170,7 @@ function initMap() {
       title: 'Wilbur Wright FWA',
       location: {
         lat: 39.9643841,
-        lng:-85.3585402
+        lng: -85.3585402
       },
       address: "2239 N. State Road 103 New Castle, IN 47362",
       phone: "(765) 529-9581",
@@ -184,7 +184,7 @@ function initMap() {
       title: 'Willow Slough FWA',
       location: {
         lat: 40.977296,
-        lng:-87.51707199999998
+        lng: -87.51707199999998
       },
       address: "1803 S. 700 W. Morocco, IN 47963",
       phone: "(219) 285-2060",
@@ -198,7 +198,7 @@ function initMap() {
       title: 'Winamac FWA',
       location: {
         lat: 41.1274914,
-        lng:-86.6316564
+        lng: -86.6316564
       },
       address: "1493 West 500 North Winamac, IN 46996",
       phone: "(574) 946-4422",
@@ -241,16 +241,21 @@ function initMap() {
     marker.addListener('click', function() {
       populateInfoWindow(this, largeInfoWindow);
     });
-
-    $('#show-listings').on('click', showListings);
-    $('#hide-listings').on('click', hideListings);
-    $('#toggle-drawing').on('click', function() {
-      toggleDrawing(drawingManager);
-    });
-    $('#filter-text-btn').on('click', function() {
-      filter();
-    });
   }
+
+  $('#show-listings').on('click', showListings);
+  $('#hide-listings').on('click', hideListings);
+  $('#toggle-drawing').on('click', function() {
+    toggleDrawing(drawingManager);
+  });
+  $('#filter-text-btn').on('click', function() {
+    filter();
+  });
+  $('#filter-text').keypress(function(e) {
+    if (e.which == 13) {
+      filter();
+    }
+  });
 
   drawingManager.addListener('overlaycomplete', function(event) {
     if (polygon) {
@@ -353,24 +358,39 @@ function filter() {
   var input = document.getElementById('filter-text').value;
   var splitInput = input.split(" ");
 
-  console.log(splitInput);
-
   if (input == '') {
-    window.alert('please enter a city or keyword');
+    window.alert('Please enter a city or keyword');
   } else {
-    geocoder.geocode({
-        address: input,
-        componentRestrictions: {
-          locality: 'Indiana'
-        }
-      },
-      function(results, status) {
-        if (status == google.maps.GeocoderStatus.OK) {
-          map.setCenter(results[0].geometry.location);
-          map.setZoom(15);
-        } else {
-          window.alert("Couldn't find location, please try again.");
-        }
-      });
+
+    for(var i = 0; i < splitInput.length; i++){
+
+    }
+    displayMarkersWithKeywords();
+    // searches map by address
+
+    // geocoder.geocode({
+    //     address: input,
+    //     componentRestrictions: {
+    //       locality: 'Indiana'
+    //     }
+    //   },
+    //   function(results, status) {
+    //     if (status == google.maps.GeocoderStatus.OK) {
+    //       map.setCenter(results[0].geometry.location);
+    //       map.setZoom(15);
+    //     } else {
+    //       window.alert("Couldn't find location, please try again.");
+    //     }
+    //   });
   }
 }
+
+var displayMarkersWithKeywords = function(keywords){
+  for(var i = 0; i < locations.length; i++){
+  for(var j = 0; i < keywords.length; j++){
+    if(locations[i].indexOf(keywords[j]) !== -1){
+      console.log("YOOOO");
+    }
+  }
+}
+};
