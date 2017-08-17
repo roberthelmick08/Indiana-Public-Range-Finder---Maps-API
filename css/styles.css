@@ -7,10 +7,14 @@ body {
 }
 .container {
   height: 100%;
+  width: 100%;
   position: relative;
+  padding-left: 0px;
+  padding-right: 0px;
 }
 input {
   font-size: 12px;
+  margin: 0 0 10px 0;
 }
 h1 {
   color: #525454;
@@ -18,20 +22,52 @@ h1 {
   margin: 0 0 10px 0;
   text-align: center;
 }
-#hide-listings,
-#show-listings {
-  width: 48%;
+li{
+  list-style: none;
 }
+
+#range-type-btn {
+  width: 100%;
+  text-align: center;
+}
+
+#range-type-btn input[type="button"] {
+  display: inline-block;
+}
+
+#filter-text-container input{
+  margin: 0 0 0 0;
+}
+
+#filter-text{
+  width:67%;
+  padding-left: 5px;
+}
+
+#filter-text-btn{
+  width: 30%;
+}
+
 hr {
   background: #D0D7D9;
   height: 1px;
   margin: 20px 0 20px 0;
   border: none;
 }
+
+#hamburger-menu{
+  position: absolute;
+  left: 210px;
+  z-index: 1;
+  font-size: 30px;
+  padding: 5px;
+  background-color: rgba(255, 255, 255, .75);
+}
+
 #map {
   bottom:0px;
   height: 100%;
-  left: 362px;
+  left: 210px;
   position: absolute;
   right: 0px;
 }
@@ -43,7 +79,7 @@ hr {
   line-height: 35px;
   padding: 10px 10px 30px 10px;
   text-align: left;
-  width: 340px;
+  width: 210px;
 }
 #pano {
   width: 200px;
