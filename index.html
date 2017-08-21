@@ -6,40 +6,43 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
+
   <script async src="js/app.js"></script>
   <script async src="js/locations.js"></script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?libraries=geometry,drawing&key=AIzaSyBMO9IQtDvlkkLGnOdx34mT8sEvfulHo6I&callback=initMap">
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMO9IQtDvlkkLGnOdx34mT8sEvfulHo6I&callback=initMap">
   </script>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
   <div class="container">
-    <div class="options-box">
+    <div class="options-box-and-ham-icon" data-bind="style: { left: menuVisible() ? '0px' : '-210px'}">
+    <div class="options-box" >
       <h1>Indiana Public Range Finder</h1>
 
       <div id="range-type-btn">
-        <input id="show-listings" type="button" value="Rifle">
-        <input id="hide-listings" type="button" value="Handgun">
-        <input id="toggle-drawing" type="button" value="Shotgun">
+        <input id="rifle-listings" type="button" value="Rifle">
+        <input id="handgun-listings" type="button" value="Handgun">
+        <input id="shotgun-listings" type="button" value="Shotgun">
       </div>
 
       <div id="filter-text-container">
-        <input type="text" id="filter-text" placeholder="City or keywords...">
-        <input type="button" id="filter-text-btn" value="Filter">
+        <input id="filter-text" placeholder="Filter..." data-bind="value: filter, valueUpdate: 'afterkeydown'">
       </div>
 
       <hr>
 
       <div id="range-list-container">
-        <ul id="range-list">
-          <li class="range-list-item"></li>
+
+        <ul id="range-list" data-bind="foreach: visibleLocations">
+          <li class="range-list-item" data-bind="text: title">List Item</li>
         </ul>
       </div>
     </div>
-
-    <div id="hamburger-menu" class="glyphicon glyphicon-menu-hamburger"></div>
-    <div id="map"></div>
+    <div id="hamburger-menu" class="glyphicon glyphicon-menu-hamburger" data-bind="click: toggleNavVisibility"></div>
+  </div>
+  <div id="map" data-bind="style: { left: menuVisible() ? '210px' : '0px'}"></div>
   </div>
 </body>
 

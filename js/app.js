@@ -1,8 +1,8 @@
 var markers = [];
-var map;
-var polygon = null;
 
+// Initialize map
 function initMap() {
+  var map;
   map = new google.maps.Map(document.getElementById('map'), {
     center: {
       lat: 39.768403,
@@ -15,8 +15,7 @@ function initMap() {
   var largeInfoWindow = new google.maps.InfoWindow();
   var bounds = new google.maps.LatLngBounds();
 
-
-// Initializes markers
+  // Initialize markers
   for (var i = 0; i < locations.length; i++) {
     var marker = new google.maps.Marker({
       position: locations[i].location,
@@ -28,6 +27,7 @@ function initMap() {
 
     markers.push(marker);
 
+    // Expands map bounds to fit all markers
     bounds.extend(marker.position);
 
     marker.addListener('click', function() {
@@ -35,59 +35,20 @@ function initMap() {
     });
   }
 
-
-//TODO: refactor to knockout
-  $('#show-listings').on('click', showListings);
-  $('#hide-listings').on('click', hideListings);
-  $('#toggle-drawing').on('click', function() {
-    toggleDrawing(drawingManager);
-  });
-  $('#filter-text-btn').on('click', function() {
-    filter();
-  });
-  $('#filter-text').keypress(function(e) {
-    if (e.which == 13) {
-      filter();
-    }
-  });
+  showListings();
 
   function populateInfoWindow(marker, infoWindow) {
     if (infoWindow.marker != marker) {
       infoWindow.marker = marker;
-      infoWindow.setContent('<div>' + marker.position + '</div>');
+      infoWindow.setContent('<div>' + marker.title + '</div>');
       infoWindow.open(map, marker);
       infoWindow.addListener('closeclick', function() {
         infoWindow.setMarker(null);
       });
-      
-      var streetViewService = new google.maps.StreetViewService();
-      var radius = 50;
-
-      function getStreetView(data, status) {
-        if (status == google.maps.StreetViewStatus.OK) {
-          var nearStreetViewLocation = data.location.latLng;
-          var heading = google.maps.geometry.spherical.computeHeading(
-            nearStreetViewLocation, marker.position);
-          infoWindow.setContent('</div><div id="pano"></div>');
-          var panoramaOptions = {
-            position: nearStreetViewLocation,
-            pov: {
-              heading: heading,
-              pitch: 30
-            }
-          };
-          var panorama = new google.maps.StreetViewPanorama($('#pano'), panoramaOptions);
-        } else {
-          infoWindow.setContent('<div>' + marker.title + '</div>' + '<div>No Street View Found</div>');
-        }
-      }
-      streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
     }
-  }
 
-  var infoWindow = new google.maps.InfoWindow({
-    content: 'Info Window content lorem ipsum dolor set'
-  });
+  }
+  ko.applyBindings(new ViewModel(locations, map));
 
   function showListings() {
     var bounds = new google.maps.LatLngBounds();
@@ -106,70 +67,53 @@ function initMap() {
   }
 }
 
-function makeMarkerIcon(markerColor) {
-  var markerImage = new google.maps.MarkerImage();
-}
+var ViewModel = function(locations, map) {
+  var self = this;
+  self.menuVisible = ko.observable(true);
+  self.locations = ko.observableArray();
 
-function toggleDrawing(drawingManager) {
-  if (drawingManager.map) {
-    drawingManager.setMap(null);
-  } else {
-    drawingManager.setMap(map);
-  }
-}
+  self.toggleNavVisibility = function() {
+    console.log(self.menuVisible());
+    self.menuVisible(self.menuVisible() ? false : true);
+    console.log(self.menuVisible());
+  };
 
-function searchWithinPolygon() {
+  locations.forEach(function(location) {
+    self.locations().push(new Location(location));
+  });
 
-  //calculate square meters within the polygon
-  var area = google.maps.geometry.spherical.computeArea(polygon.getPath());
-  window.alert(area + "sq m");
-  for (var i = 0; i < markers.length; i++) {
-    if (google.maps.geometry.poly.containsLocation(markers[i].position, polygon)) {
-      markers[i].setMap(map);
+  self.visibleLocations = ko.observableArray(self.locations());
+
+  console.log(self.visibleLocations());
+
+  self.filteredItems = ko.computed(function() {
+    console.log(this);
+    var filter = this.filter().toLowerCase();
+    if (!filter) {
+      return this.locations();
     } else {
-      markers[i].setMap(null);
+        return ko.utils.arrayFilter(this.locations(), function(item) {
+            return ko.utils.stringStartsWith(item.name().toLowerCase(), filter);
+        });
     }
-  }
-}
+}, this);
 
-function filter() {
-  var geocoder = new google.maps.Geocoder();
-  var input = document.getElementById('filter-text').value;
-  var splitInput = input.split(" ");
-
-  if (input == '') {
-    window.alert('Please enter a city or keyword');
-  } else {
-
-    for(var i = 0; i < splitInput.length; i++){
-
-    }
-    displayMarkersWithKeywords();
-    // searches map by address
-
-    // geocoder.geocode({
-    //     address: input,
-    //     componentRestrictions: {
-    //       locality: 'Indiana'
-    //     }
-    //   },
-    //   function(results, status) {
-    //     if (status == google.maps.GeocoderStatus.OK) {
-    //       map.setCenter(results[0].geometry.location);
-    //       map.setZoom(15);
-    //     } else {
-    //       window.alert("Couldn't find location, please try again.");
-    //     }
-    //   });
-  }
-}
-
-var displayMarkersWithKeywords = function(keywords){
-  for(var i = 0; i < locations.length; i++){
-  for(var j = 0; i < keywords.length; j++){
-    if(locations[i].indexOf(keywords[j]) !== -1){
-      console.log("YOOOO");
-    }
-  }
-}
+  // self.filterListings = ko.computed({
+  //   read: function() {
+  //     return "";
+  //   },
+  //   write: function(input) {
+  //     // Empty visibleLocations array
+  //     self.visibleLocations([]);
+  //
+  //     self.locations().forEach(function(location) {
+  //       location.marker.setVisible(false);
+  //
+  //       if (location.name().toLowerCase().includes(input.toLowerCase())) {
+  //         self.visibleLocations.push(location);
+  //         marker.setVisible(true);
+  //       }
+  //     });
+  //   }
+  // });
 };
