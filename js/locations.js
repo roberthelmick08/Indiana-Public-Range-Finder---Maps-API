@@ -197,13 +197,6 @@ var locations = [{
 ];
 
 var Location = function(location){
-  this.title = ko.observable(location.title);
-  this.location = ko.observable(location.location);
-  this.address = ko.observable(location.address);
-  this.phone = ko.observable(location.phone);
-  this.website = ko.observable(location.website);
-  this.fees = ko.observable(location.fees);
-  this.rifle = ko.observable(location.rifle);
-  this.handgun = ko.observable(location.handgun);
-  this.shotgun = ko.observable(location.shotgun);
+  this.title = location.title;
+  this.location = location.location;
 };
