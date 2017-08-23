@@ -4,6 +4,8 @@
 
 This single-page web app displays all publicly-owned shooting ranges in Indiana, integrating the Google Maps and Foursquare APIs. The interactive map displays user check-in information from Foursquare.
 
+Hosted live at: https://roberthelmick08.github.io/maps-api-project/
+
 ## Getting Started
 
 1. Clone repository
