@@ -1,4 +1,10 @@
-// var markers = ko.observableArray([]);
+/*
+  TODO:
+    * 3rd party API
+    * error handling
+    * attributions & documentation
+      * README
+*/
 var map;
 
 // Initialize map
@@ -17,7 +23,16 @@ function initMap() {
 
 var ViewModel = function(locations, map) {
   var self = this;
-  self.menuVisible = ko.observable(true);
+  console.log($(window).width());
+
+  // sets options menu visibility based on window width
+  if($(window).width() < 720){
+    self.menuVisible = ko.observable(false);
+    google.maps.event.trigger(map, 'resize');
+  } else {
+    self.menuVisible = ko.observable(true);
+  }
+
   self.locations = ko.observableArray([]);
   self.markers = ko.observableArray([]);
 
@@ -51,13 +66,15 @@ var ViewModel = function(locations, map) {
       };
 
       self.toggleSelectedMarker = function(marker){
+        map.panTo(marker.position);
+
         if (marker.getAnimation() !== null) {
          marker.setAnimation(null);
        } else {
          marker.setAnimation(google.maps.Animation.BOUNCE);
          setTimeout(function(){ marker.setAnimation(null); }, 750);
        }
-      }
+     };
 
       self.marker.addListener('click', function() {
         self.toggleSelectedMarker(this);
@@ -124,7 +141,6 @@ var ViewModel = function(locations, map) {
   }, ViewModel);
 
   self.highlightMarker = function(marker){
-    console.log(marker);
     self.toggleSelectedMarker(marker);
     self.populateInfoWindow(marker, largeInfoWindow);
   };
