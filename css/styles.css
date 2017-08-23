@@ -102,6 +102,13 @@ hr {
 .text {
   font-size: 12px;
 }
+#infoWindow{
+  text-align:center;
+}
+
+#attribution-text{
+  font-size: 10px;
+}
 
 .range-list-item{
   cursor: pointer;

@@ -1,13 +1,11 @@
 /*
   TODO:
-    * 3rd party API
-    * error handling
     * attributions & documentation
       * README
 */
 var map;
 
-// Initialize map
+// Initialize map. Attribution: Google Maps API
 function initMap() {
   map = new google.maps.Map(document.getElementById('map'), {
     center: {
@@ -23,10 +21,9 @@ function initMap() {
 
 var ViewModel = function(locations, map) {
   var self = this;
-  console.log($(window).width());
 
-  // sets options menu visibility based on window width
-  if($(window).width() < 720){
+  // Sets options menu visibility based on window width
+  if ($(window).width() < 720) {
     self.menuVisible = ko.observable(false);
     google.maps.event.trigger(map, 'resize');
   } else {
@@ -54,31 +51,78 @@ var ViewModel = function(locations, map) {
       // Expands map bounds to fit all markers
       bounds.extend(self.marker.position);
 
+      // to be displayed in InfoWindow
+      self.highlightedPlaceCheckins = ko.observable();
+      self.highlightedPlaceUsers = ko.observable();
+
+      self.getFoursquareData = function(place) {
+        // Attribution: Foursquare (https://developer.foursquare.com/docs/venues/venues)
+        var url = 'https://api.foursquare.com/v2/venues/search?' +
+          'll=' + place.position.lat() + ', ' + place.position.lng() +
+          '&query=' + place.title +
+          '&client_id=HQJPL3TWZYPFNF22MMGKGOXQD4LDXAB4ZCDMEY24COWJUZ2W' +
+          '&client_secret=UEIJHNVSUWXQEKFGWDCBMUMZRCV4S4SDKKYM2HR4LWRDXG1H' +
+          '&v=20170823' +
+          '&limit=1';
+
+        self.apiSuccess = ko.observable(false);
+
+        $.ajax(url, {
+          success: function(val) {
+            if (val.response.venues.length > 0) {
+              self.apiSuccess(true);
+              var venue = val.response.venues[0];
+              console.log(venue);
+              self.highlightedPlaceCheckins(venue.stats.checkinsCount ? venue.stats.checkinsCount : '0');
+              self.highlightedPlaceUsers(venue.hereNow.count ? venue.hereNow.count : '0');
+              self.populateInfoWindow(place, largeInfoWindow);
+            } else {
+              self.apiSuccess(false);
+              alert("No results found");
+            }
+          },
+          error: function() {
+            self.apiSuccess(false);
+            alert("Foursquare API load failed");
+          }
+        });
+      };
+
       self.populateInfoWindow = function(marker, infoWindow) {
         if (infoWindow.marker != marker) {
           infoWindow.marker = marker;
-          infoWindow.setContent('<div>' + marker.title + '</div>');
+          infoWindow.setContent(
+            '<div id="infoWindow"><strong>' +
+            marker.title +
+            '</strong><hr> Check-ins: ' +
+            self.highlightedPlaceCheckins() +
+            '<br> Users here now: ' +
+            self.highlightedPlaceUsers() +
+            '<hr> <div id="attribution-text">Powered by Foursquare</div>' +
+            '</div>'
+          );
           infoWindow.open(map, marker);
-          infoWindow.addListener('closeclick', function() {
-            infoWindow.setMarker(null);
-          });
         }
       };
 
-      self.toggleSelectedMarker = function(marker){
+
+      // Sets animation when selected
+      self.toggleSelectedMarker = function(marker) {
         map.panTo(marker.position);
 
         if (marker.getAnimation() !== null) {
-         marker.setAnimation(null);
-       } else {
-         marker.setAnimation(google.maps.Animation.BOUNCE);
-         setTimeout(function(){ marker.setAnimation(null); }, 750);
-       }
-     };
+          marker.setAnimation(null);
+        } else {
+          marker.setAnimation(google.maps.Animation.BOUNCE);
+          setTimeout(function() {
+            marker.setAnimation(null);
+          }, 750);
+        }
+        self.getFoursquareData(marker);
+      };
 
       self.marker.addListener('click', function() {
         self.toggleSelectedMarker(this);
-        self.populateInfoWindow(this, largeInfoWindow);
       });
     }
   }
@@ -119,7 +163,7 @@ var ViewModel = function(locations, map) {
       }
       return self.markers();
     } else {
-        filteredArray = ko.utils.arrayFilter(self.markers(), function(item) {
+      filteredArray = ko.utils.arrayFilter(self.markers(), function(item) {
         var string = item.title.toLowerCase();
         var result = (string.search(self.filter()) >= 0);
         return result;
@@ -139,9 +183,4 @@ var ViewModel = function(locations, map) {
       return self.tempMarkers();
     }
   }, ViewModel);
-
-  self.highlightMarker = function(marker){
-    self.toggleSelectedMarker(marker);
-    self.populateInfoWindow(marker, largeInfoWindow);
-  };
 };

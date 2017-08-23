@@ -12,26 +12,27 @@
 <body>
   <div class="container">
     <div class="options-box-and-ham-icon" data-bind="style: { left: menuVisible() ? '0px' : '-210px'}">
-    <div class="options-box" >
-      <h1>Indiana Public Range Finder</h1>
+      <div class="options-box">
+        <h1>Indiana Public Range Finder</h1>
 
-      <div id="filter-text-container">
-        <input id="filter-text" type="search" placeholder="Filter..." data-bind="value: search, valueUpdate: 'afterkeydown'">
+        <div id="filter-text-container">
+          <input id="filter-text" type="search" placeholder="Filter..." data-bind="value: search, valueUpdate: 'afterkeydown'">
+        </div>
+
+        <hr>
+
+        <div id="range-list-container">
+
+          <ul id="range-list" data-bind="foreach: filteredItems">
+            <li class="range-list-item" data-bind="click: $parent.toggleSelectedMarker, text: title">List Item</li>
+          </ul>
+        </div>
       </div>
-
-      <hr>
-
-      <div id="range-list-container">
-
-        <ul id="range-list" data-bind="foreach: filteredItems">
-          <li class="range-list-item" data-bind="click: $parent.highlightMarker, text: title">List Item</li>
-        </ul>
-      </div>
+      <div id="hamburger-menu" class="glyphicon glyphicon-menu-hamburger" data-bind="click: toggleNavVisibility"></div>
     </div>
-    <div id="hamburger-menu" class="glyphicon glyphicon-menu-hamburger" data-bind="click: toggleNavVisibility"></div>
+    <div id="map" data-bind="style: { left: menuVisible() ? '210px' : '0px'}"></div>
   </div>
-  <div id="map" data-bind="style: { left: menuVisible() ? '210px' : '0px'}"></div>
-  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>

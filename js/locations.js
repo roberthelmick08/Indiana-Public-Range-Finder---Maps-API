@@ -20,14 +20,14 @@ var locations = [{
     },
   },
   {
-    title: 'Crosley Fish & Wildlife Area',
+    title: 'Crosley FWA',
     location: {
       lat: 38.9597008,
       lng: -85.5997931
     },
   },
   {
-    title: 'Deer Creek Fish & Wildlife Area',
+    title: 'Deer Creek FWA',
     location: {
       lat: 39.5737858,
       lng: -86.88452370000005
