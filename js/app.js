@@ -34,39 +34,33 @@ var ViewModel = function(locations, map) {
         mapTypeControl: false,
         id: i
       });
-      console.log(self.marker);
+
       self.markers().push(self.marker);
       // Expands map bounds to fit all markers
       bounds.extend(self.marker.position);
 
+      self.populateInfoWindow = function(marker, infoWindow) {
+        if (infoWindow.marker != marker) {
+          infoWindow.marker = marker;
+          infoWindow.setContent('<div>' + marker.title + '</div>');
+          infoWindow.open(map, marker);
+          infoWindow.addListener('closeclick', function() {
+            infoWindow.setMarker(null);
+          });
+        }
+      };
+
       self.marker.addListener('click', function() {
-        populateInfoWindow(this, largeInfoWindow);
+        self.populateInfoWindow(this, largeInfoWindow);
       });
     }
-    console.log("array");
-    console.log(self.markers());
   }
 
   initMarkers();
 
-  self.populateInfoWindow = function(marker, infoWindow) {
-    if (infoWindow.marker != marker) {
-      infoWindow.marker = marker;
-      infoWindow.setContent('<div>' + marker.title + '</div>');
-      infoWindow.open(map, marker);
-      infoWindow.addListener('closeclick', function() {
-        infoWindow.setMarker(null);
-      });
-    }
-  };
-
-  self.showListings = function() {
+  self.showMarkers = function() {
     var bounds = new google.maps.LatLngBounds();
 
-    // for (var marker in self.markers()) {
-    //   self.markers[i].setMap(map);
-    //   bounds.extend(self.markers[i].position);
-    // }
     for (var i = 0; i < self.markers().length; i++) {
       self.markers()[i].setMap(map);
       bounds.extend(self.markers()[i].position);
@@ -74,11 +68,21 @@ var ViewModel = function(locations, map) {
     map.fitBounds(bounds);
   };
 
-  self.showListings();
+  self.showMarkers();
 
-  self.hideListings = function() {
-    for (var i = 0; i < self.markers.length; i++) {
-      markers[i].setMap(null);
+  self.hideMarkers = function(filteredArray) {
+    self.filteredArray = ko.observableArray(filteredArray);
+    console.log("self.filteredArray():");
+    console.log(self.filteredArray());
+    console.log("self.markers():");
+    console.log(self.markers());
+
+    for (var j = 0; j < self.markers().length; j++) {
+      for (var i = 0; i < self.filteredArray().length; i++) {
+        if(self.markers()[j].title === self.filteredArray()[i].title){
+          self.markers()[j].setMap(null);
+        }
+      }
     }
   };
 
@@ -101,24 +105,36 @@ var ViewModel = function(locations, map) {
     return string.substring(0, startsWith.length) === startsWith;
   };
 
+  // Attribution: Ryan Niemeyer (http://www.knockmeout.net/2011/04/utility-functions-in-knockoutjs.html)
   self.filteredItems = ko.computed(function() {
     var filter = self.search().toLowerCase();
     if (!filter) {
       return self.locations();
     } else {
-      return ko.utils.arrayFilter(self.locations(), function(item) {
-        var string = item.title().toLowerCase();
+      var filteredArray = ko.utils.arrayFilter(self.markers(), function(item) {
+        var string = item.title.toLowerCase();
         var result = (string.search(filter) >= 0);
         return result;
       });
+      // self.hideMarkers(filteredArray);
+
+      // set marker visibility to false
+      for (var i = 0; i < self.markers().length; i++) {
+        self.markers()[i].setVisible(false);
+      }
+
+      self.markers(filteredArray);
+
+      // set marker visibility to true for filtered values
+      for (i = 0; i < self.markers().length; i++) {
+        if(self.markers()[i].visible){
+          self.markers()[i].setVisible(false);
+        } else{
+          self.markers()[i].setVisible(true);
+        }
+      }
+      return self.markers();
     }
   }, ViewModel);
-};
 
-ViewModel.prototype.showMarker = function(map) {
-  marker.setMap(map);
-};
-
-ViewModel.prototype.hideMarker = function() {
-  marker.setMap(null);
 };
