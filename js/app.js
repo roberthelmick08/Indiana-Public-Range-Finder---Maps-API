@@ -50,7 +50,17 @@ var ViewModel = function(locations, map) {
         }
       };
 
+      self.toggleSelectedMarker = function(marker){
+        if (marker.getAnimation() !== null) {
+         marker.setAnimation(null);
+       } else {
+         marker.setAnimation(google.maps.Animation.BOUNCE);
+         setTimeout(function(){ marker.setAnimation(null); }, 750);
+       }
+      }
+
       self.marker.addListener('click', function() {
+        self.toggleSelectedMarker(this);
         self.populateInfoWindow(this, largeInfoWindow);
       });
     }
@@ -70,26 +80,9 @@ var ViewModel = function(locations, map) {
 
   self.showMarkers();
 
-  self.hideMarkers = function(filteredArray) {
-    self.filteredArray = ko.observableArray(filteredArray);
-    console.log("self.filteredArray():");
-    console.log(self.filteredArray());
-    console.log("self.markers():");
-    console.log(self.markers());
-
-    for (var j = 0; j < self.markers().length; j++) {
-      for (var i = 0; i < self.filteredArray().length; i++) {
-        if(self.markers()[j].title === self.filteredArray()[i].title){
-          self.markers()[j].setMap(null);
-        }
-      }
-    }
-  };
-
+  // Moves options menu offscreen
   self.toggleNavVisibility = function() {
-    console.log(self.menuVisible());
     self.menuVisible(self.menuVisible() ? false : true);
-    console.log(self.menuVisible());
   };
 
   locations.forEach(function(location) {
@@ -98,43 +91,41 @@ var ViewModel = function(locations, map) {
 
   self.search = ko.observable('');
 
-  var stringStartsWith = function(string, startsWith) {
-    string = string || "";
-    if (startsWith.length > string.length)
-      return false;
-    return string.substring(0, startsWith.length) === startsWith;
-  };
-
   // Attribution: Ryan Niemeyer (http://www.knockmeout.net/2011/04/utility-functions-in-knockoutjs.html)
   self.filteredItems = ko.computed(function() {
-    var filter = self.search().toLowerCase();
-    if (!filter) {
-      return self.locations();
+    self.filter = ko.observable(self.search().toLowerCase());
+
+    if (!self.filter()) {
+      // Reset all markers if filter query is empty
+      for (var x = 0; x < self.markers().length; x++) {
+        self.markers()[x].setVisible(true);
+      }
+      return self.markers();
     } else {
-      var filteredArray = ko.utils.arrayFilter(self.markers(), function(item) {
+        filteredArray = ko.utils.arrayFilter(self.markers(), function(item) {
         var string = item.title.toLowerCase();
-        var result = (string.search(filter) >= 0);
+        var result = (string.search(self.filter()) >= 0);
         return result;
       });
-      // self.hideMarkers(filteredArray);
 
-      // set marker visibility to false
+      // set all markers' visibility to false
       for (var i = 0; i < self.markers().length; i++) {
         self.markers()[i].setVisible(false);
       }
 
-      self.markers(filteredArray);
+      self.tempMarkers = ko.observableArray(filteredArray);
 
       // set marker visibility to true for filtered values
-      for (i = 0; i < self.markers().length; i++) {
-        if(self.markers()[i].visible){
-          self.markers()[i].setVisible(false);
-        } else{
-          self.markers()[i].setVisible(true);
-        }
+      for (i = 0; i < self.tempMarkers().length; i++) {
+        self.markers()[i].setVisible(true);
       }
-      return self.markers();
+      return self.tempMarkers();
     }
   }, ViewModel);
 
+  self.highlightMarker = function(marker){
+    console.log(marker);
+    self.toggleSelectedMarker(marker);
+    self.populateInfoWindow(marker, largeInfoWindow);
+  };
 };
