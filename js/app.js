@@ -1,8 +1,3 @@
-/*
-  TODO:
-    * attributions & documentation
-      * README
-*/
 var map;
 
 // Initialize map. Attribution: Google Maps API
@@ -51,12 +46,12 @@ var ViewModel = function(locations, map) {
       // Expands map bounds to fit all markers
       bounds.extend(self.marker.position);
 
-      // to be displayed in InfoWindow
+      // to be displayed in infoWindow
       self.highlightedPlaceCheckins = ko.observable();
       self.highlightedPlaceUsers = ko.observable();
 
+      // Attribution: Foursquare (https://developer.foursquare.com/docs/venues/venues)
       self.getFoursquareData = function(place) {
-        // Attribution: Foursquare (https://developer.foursquare.com/docs/venues/venues)
         var url = 'https://api.foursquare.com/v2/venues/search?' +
           'll=' + place.position.lat() + ', ' + place.position.lng() +
           '&query=' + place.title +
@@ -108,6 +103,7 @@ var ViewModel = function(locations, map) {
 
       // Sets animation when selected
       self.toggleSelectedMarker = function(marker) {
+        // center map on highlighted marker
         map.panTo(marker.position);
 
         if (marker.getAnimation() !== null) {
@@ -146,6 +142,7 @@ var ViewModel = function(locations, map) {
     self.menuVisible(self.menuVisible() ? false : true);
   };
 
+  // Initialize locations
   locations.forEach(function(location) {
     self.locations().push(new Location(location));
   });
