@@ -67,7 +67,6 @@ var ViewModel = function(locations, map) {
             if (val.response.venues.length > 0) {
               self.apiSuccess(true);
               var venue = val.response.venues[0];
-              console.log(venue);
               self.highlightedPlaceCheckins(venue.stats.checkinsCount ? venue.stats.checkinsCount : '0');
               self.highlightedPlaceUsers(venue.hereNow.count ? venue.hereNow.count : '0');
               self.populateInfoWindow(place, largeInfoWindow);
