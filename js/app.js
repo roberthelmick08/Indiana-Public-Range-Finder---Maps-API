@@ -1,4 +1,15 @@
-var map;
+function init(error) {
+
+    var map;
+
+    if (!error) {
+        // Create the map
+        map = initMap();
+
+    } else {
+        alert('Error loading Google Maps API.');
+    }
+}
 
 // Initialize map. Attribution: Google Maps API
 function initMap() {
