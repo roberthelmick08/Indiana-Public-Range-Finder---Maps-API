@@ -33,6 +33,13 @@ var ViewModel = function(locations, map) {
 
   // Initialize markers
   function initMarkers() {
+
+    self.addEvents = function(marker) {
+      marker.addListener('click', function() {
+        self.toggleSelectedMarker(marker);
+      });
+    };
+
     for (var i = 0; i < locations.length; i++) {
       self.marker = new google.maps.Marker({
         position: locations[i].location,
@@ -50,79 +57,79 @@ var ViewModel = function(locations, map) {
       self.highlightedPlaceCheckins = ko.observable();
       self.highlightedPlaceUsers = ko.observable();
 
-      // Attribution: Foursquare (https://developer.foursquare.com/docs/venues/venues)
-      self.getFoursquareData = function(place) {
-        var url = 'https://api.foursquare.com/v2/venues/search?' +
-          'll=' + place.position.lat() + ', ' + place.position.lng() +
-          '&query=' + place.title +
-          '&client_id=HQJPL3TWZYPFNF22MMGKGOXQD4LDXAB4ZCDMEY24COWJUZ2W' +
-          '&client_secret=UEIJHNVSUWXQEKFGWDCBMUMZRCV4S4SDKKYM2HR4LWRDXG1H' +
-          '&v=20170823' +
-          '&limit=1';
+      self.addEvents(self.marker);
 
-        self.apiSuccess = ko.observable(false);
-
-        $.ajax(url, {
-          success: function(val) {
-            if (val.response.venues.length > 0) {
-              self.apiSuccess(true);
-              var venue = val.response.venues[0];
-              self.highlightedPlaceCheckins(venue.stats.checkinsCount ? venue.stats.checkinsCount : '0');
-              self.highlightedPlaceUsers(venue.hereNow.count ? venue.hereNow.count : '0');
-              self.populateInfoWindow(place, largeInfoWindow);
-            } else {
-              self.apiSuccess(false);
-              alert("No results found");
-            }
-          },
-          error: function() {
-            self.apiSuccess(false);
-            alert("Foursquare API load failed");
-          }
-        });
-      };
-
-      self.populateInfoWindow = function(marker, infoWindow) {
-        if (infoWindow.marker != marker) {
-          infoWindow.marker = marker;
-          infoWindow.setContent(
-            '<div id="infoWindow"><strong>' +
-            marker.title +
-            '</strong><hr> Check-ins: ' +
-            self.highlightedPlaceCheckins() +
-            '<br> Users here now: ' +
-            self.highlightedPlaceUsers() +
-            '<hr> <div id="attribution-text">Powered by Foursquare</div>' +
-            '</div>'
-          );
-          infoWindow.open(map, marker);
-        }
-      };
-
-
-      // Sets animation when selected
-      self.toggleSelectedMarker = function(marker) {
-        // center map on highlighted marker
-        map.panTo(marker.position);
-
-        if (marker.getAnimation() !== null) {
-          marker.setAnimation(null);
-        } else {
-          marker.setAnimation(google.maps.Animation.BOUNCE);
-          setTimeout(function() {
-            marker.setAnimation(null);
-          }, 750);
-        }
-        self.getFoursquareData(marker);
-      };
-
-      self.marker.addListener('click', function() {
-        self.toggleSelectedMarker(this);
-      });
     }
   }
 
   initMarkers();
+
+
+
+  // Attribution: Foursquare (https://developer.foursquare.com/docs/venues/venues)
+  self.getFoursquareData = function(place) {
+    var url = 'https://api.foursquare.com/v2/venues/search?' +
+      'll=' + place.position.lat() + ', ' + place.position.lng() +
+      '&query=' + place.title +
+      '&client_id=HQJPL3TWZYPFNF22MMGKGOXQD4LDXAB4ZCDMEY24COWJUZ2W' +
+      '&client_secret=UEIJHNVSUWXQEKFGWDCBMUMZRCV4S4SDKKYM2HR4LWRDXG1H' +
+      '&v=20170823' +
+      '&limit=1';
+
+    self.apiSuccess = ko.observable(false);
+
+    $.ajax(url, {
+      success: function(val) {
+        if (val.response.venues.length > 0) {
+          self.apiSuccess(true);
+          var venue = val.response.venues[0];
+          self.highlightedPlaceCheckins(venue.stats.checkinsCount ? venue.stats.checkinsCount : '0');
+          self.highlightedPlaceUsers(venue.hereNow.count ? venue.hereNow.count : '0');
+          self.populateInfoWindow(place, largeInfoWindow);
+        } else {
+          self.apiSuccess(false);
+          alert("No results found");
+        }
+      },
+      error: function() {
+        self.apiSuccess(false);
+        alert("Foursquare API load failed");
+      }
+    });
+  };
+
+  self.populateInfoWindow = function(marker, infoWindow) {
+    if (infoWindow.marker != marker) {
+      infoWindow.marker = marker;
+      infoWindow.setContent(
+        '<div id="infoWindow"><strong>' +
+        marker.title +
+        '</strong><hr> Check-ins: ' +
+        self.highlightedPlaceCheckins() +
+        '<br> Users here now: ' +
+        self.highlightedPlaceUsers() +
+        '<hr> <div id="attribution-text">Powered by Foursquare</div>' +
+        '</div>'
+      );
+      infoWindow.open(map, marker);
+    }
+  };
+
+  // Sets animation when selected
+  self.toggleSelectedMarker = function(marker) {
+    // center map on highlighted marker
+    map.panTo(marker.position);
+
+    if (marker.getAnimation() !== null) {
+      marker.setAnimation(null);
+    } else {
+      marker.setAnimation(google.maps.Animation.BOUNCE);
+      setTimeout(function() {
+        marker.setAnimation(null);
+      }, 750);
+    }
+    self.getFoursquareData(marker);
+  };
 
   self.showMarkers = function() {
     var bounds = new google.maps.LatLngBounds();
